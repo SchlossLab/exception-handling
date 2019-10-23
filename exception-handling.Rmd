@@ -1,0 +1,73 @@
+---
+title: "Exception Handling in R"
+author: "Kelly Sovacool"
+date: "28 Oct. 2019"
+output: 
+    ioslides_presentation:
+        widescreen: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+## Why?
+
+
+
+## Ten simple rules for documenting scientific software
+
+### Excerpted from [Lee et al. 2018](https://doi.org/10.1371/journal.pcbi.1006561):
+
+- Write error messages that provide solutions or point to your documentation.
+
+
+## How (specifics for R)
+
+### Best practices:
+
+
+
+## Activity
+
+Let's write conditions for the code from the [Riffomonas minimalR](http://www.riffomonas.org/minimalR/06_line_plots.html) tutorial!
+
+## Activity
+
+1. Clone this repo
+    ```{bash}
+    git clone https://github.com/SchlossLab/documenting-R
+    ```
+    or if you previously cloned it, pull new commits:
+    ```{bash}
+    cd path/to/documenting-R/ ; git pull
+    ```
+1. Checkout a new branch
+    ```{bash}
+    git checkout -b descriptive-branch-name
+    ```
+1. After modifying your part, commit your changes
+    ```{bash}
+    git add . ; git commit -m "descriptive commit message"
+    ```
+
+## Activity Wrap-up
+
+1. Push your changes
+    ```{bash}
+    git push -u origin descriptive-branch-name
+    ```
+1. Open a pull request on GitHub to merge your branch into master. 
+    Mention your issue number(s) & assign me to the PR.
+    
+    ![new P](figures/new_PR.png){height=275px} ![example PR](figures/example_PR.png){height=275px}
+
+
+## Additional Reading
+
+- [Advanced R - conditions chapter](http://r-pkgs.had.co.nz/man.html) - Hadley Wickham
+    
+
+```{r, echo=FALSE}
+library(rmarkdown)
+rmarkdown::render('exception-handling.Rmd', output_file = 'docs/exception-handling.html')
+```

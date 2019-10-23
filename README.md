@@ -1,5 +1,12 @@
-# documenting-R
+# exception-handling
 
-Materials for a code review on documenting R code for the lab meeting on 2019-05-21.
+Materials for a code review on exception handling in R for the lab meeting on 2019-10-28.
 
-See the [R Markdown file](documentingR.Rmd) for instructions or view the rendered [presentation](http://www.schlosslab.org/documenting-R/documentingR.html).
+See the [R Markdown file](exception-handling.Rmd) for instructions or view the rendered [presentation](http://www.schlosslab.org/documenting-R/exception-handling.html).
+
+## Dependencies
+
+- `R`
+- `rlang`
+
+Exhaustive dependencies are listed in the conda environment file: [`environment.yml`](environment.yml).

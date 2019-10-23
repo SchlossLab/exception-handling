@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Documenting R Code</title>
+  <title>Exception Handling in R</title>
 
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="chrome=1">
@@ -19,7 +19,7 @@
     var SLIDE_CONFIG = {
       // Slide settings
       settings: {
-                title: 'Documenting R Code',
+                title: 'Exception Handling in R',
                         useBuilds: true,
         usePrettify: true,
         enableSlideAreas: true,
@@ -3115,162 +3115,27 @@ slide:not(.current) .plotly.html-widget{
       <h1 data-config-title><!-- populated from slide_config.json --></h1>
       <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
       <p data-config-presenter><!-- populated from slide_config.json --></p>
-            <p style="margin-top: 6px; margin-left: -2px;">5/21/2019</p>
+            <p style="margin-top: 6px; margin-left: -2px;">28 Oct. 2019</p>
           </hgroup>
   </slide>
 
-<slide class=""><hgroup><h2>Why document your code?</h2></hgroup><article  id="why-document-your-code">
-
-<ul>
-<li>Reproducibility</li>
-<li><a href='https://doi.org/10.1038/sdata.2016.18' title=''>FAIR</a> data principles: findable, accessible, <strong>interopable</strong>, <strong>reusable</strong></li>
-<li>Make it usable for other scientists – including future you!</li>
-</ul>
-
-<p>See papers listed at the <a href='http://www.riffomonas.org/reproducible_research/' title=''>Riffomonas Tutorial</a> for further reading on reproducibility.</p>
+<slide class=""><hgroup><h2>Why?</h2></hgroup><article  id="why">
 
 </article></slide><slide class=""><hgroup><h2>Ten simple rules for documenting scientific software</h2></hgroup><article  id="ten-simple-rules-for-documenting-scientific-software">
 
 <h3>Excerpted from <a href='https://doi.org/10.1371/journal.pcbi.1006561' title=''>Lee et al. 2018</a>:</h3>
 
 <ul>
-<li>Write comments as you code.</li>
-<li>Include a README file with basic information.</li>
-<li>Version control your documentation.</li>
-<li>Use automated documentation tools.</li>
 <li>Write error messages that provide solutions or point to your documentation.</li>
 </ul>
-
-</article></slide><slide class=""><hgroup><h2>What not to document</h2></hgroup><article  id="what-not-to-document">
-
-<ul>
-<li><p>&ldquo;Document Design and Purpose, Not Mechanics&rdquo; - <a href='https://doi.org/10.1371/journal.pbio.1001745' title=''>Wilson et al. 2014</a></p></li>
-<li><p>In other words, &ldquo;Why, not how&rdquo;.</p></li>
-<li><p>Don’t do this:</p>
-
-<pre class = 'prettyprint lang-r'>i &lt;- i + 1  # increment `i` by 1</pre></li>
-<li><p>Try to write code that is self-documenting.</p>
-
-<ul>
-<li>Use descriptive variable names. If you have to write a comment to describe your variable, you probably need to rename it. Examples:
-
-<ul>
-<li><code>counter</code> instead of <code>i</code></li>
-<li><code>patient_metadata</code> instead of <code>df</code></li>
-<li><code>data_cleaned</code> instead of <code>df2</code></li>
-</ul></li>
-</ul></li>
-</ul>
-
-</article></slide><slide class=""><hgroup><h2>What to document</h2></hgroup><article  id="what-to-document">
-
-<ul>
-<li>No code is fully self-documenting.</li>
-<li>You should document:
-
-<ul>
-<li>packages</li>
-<li>datasets</li>
-<li>functions</li>
-<li>classes</li>
-<li>any tricky lines of code</li>
-</ul></li>
-</ul>
-
-</article></slide><slide class=""><hgroup><h2>How to document</h2></hgroup><article  id="how-to-document">
-
-<h3>The bare minimum:</h3>
-
-<p>Include a comment at the top of your R script to briefly describe what it does at a high level.</p>
-
-<pre class = 'prettyprint lang-r'># Generate plots from mothur sensspec files for comparing clustering algorithms.
-library(ggplot2)</pre>
 
 </article></slide><slide class=""><hgroup><h2>How (specifics for R)</h2></hgroup><article  id="how-specifics-for-r">
 
 <h3>Best practices:</h3>
 
-<ul>
-<li>For any project with R scripts:
-
-<ul>
-<li>Write comments alongside your code with <code>roxygen2</code> syntax for <code>man/</code> files.</li>
-<li>Make your project a package with <code>usethis</code> &amp; <code>devtools</code>.</li>
-</ul></li>
-<li>For packages you release into the wild:
-
-<ul>
-<li>Write a vignette with <code>R Markdown</code>.</li>
-<li>Create a website with <code>pkgdown</code>.</li>
-</ul></li>
-</ul>
-
-</article></slide><slide class=""><hgroup><h2><code>roxygen2</code> syntax</h2></hgroup><article  id="roxygen2-syntax">
-
-<p><a href='http://r-pkgs.had.co.nz/man.html#man-functions' title=''>Document functions</a> in <code>R/*.R</code> files</p>
-
-<pre class = 'prettyprint lang-r'>#&#39; Add together two numbers.
-#&#39; 
-#&#39; @param x A number.
-#&#39; @param y A number.
-#&#39; @return The sum of \code{x} and \code{y}.
-#&#39; @examples
-#&#39; add(1, 1)
-#&#39; add(10, 1)
-add &lt;- function(x, y) {
-   x + y
-}</pre>
-
-</article></slide><slide class=""><hgroup><h2><code>roxygen2</code> syntax</h2></hgroup><article  id="roxygen2-syntax-1">
-
-<p><a href='http://r-pkgs.had.co.nz/data.html#documenting-data' title=''>Document datasets</a> in <code>R/data.R</code></p>
-
-<pre class = 'prettyprint lang-r'>#&#39; Prices of 50,000 round cut diamonds.
-#&#39;
-#&#39; A dataset containing the prices and other attributes of almost 54,000
-#&#39; diamonds.
-#&#39;
-#&#39; @format A data frame with 53940 rows and 10 variables:
-#&#39; \describe{
-#&#39;   \item{price}{price, in US dollars}
-#&#39;   \item{carat}{weight of the diamond, in carats}
-#&#39;   ...
-#&#39; }
-#&#39; @source \url{http://www.diamondse.info/}
-&quot;diamonds&quot;</pre>
-
-</article></slide><slide class=""><hgroup><h2><code>roxygen2</code> syntax</h2></hgroup><article  id="roxygen2-syntax-2">
-
-<p><a href='http://r-pkgs.had.co.nz/man.html#man-packages' title=''>Document the package</a> in <code>R/package_name.R</code></p>
-
-<pre class = 'prettyprint lang-r'>#&#39; foo: A package for computating the notorious bar statistic.
-#&#39;
-#&#39; The foo package provides three categories of important functions:
-#&#39; foo, bar and baz.
-#&#39; 
-#&#39; @section Foo functions:
-#&#39; The foo functions ...
-#&#39;
-#&#39; @docType package
-#&#39; @name foo
-NULL</pre>
-
 </article></slide><slide class=""><hgroup><h2>Activity</h2></hgroup><article  id="activity">
 
-<p>Let’s document code from the <a href='http://www.riffomonas.org/minimalR/06_line_plots.html' title=''>Riffomonas minimalR</a> tutorial!</p>
-
-<ol>
-<li>The package: <code>minimalR</code>. Edit <a href='R/minimalR.R' title=''>R/minimalR.R</a>.</li>
-<li>The dataset: <code>baxter_metadata</code>. Edit <a href='R/data.R' title=''>R/data.R</a> (raw data in <code>inst/extdata/</code>, processed data in <code>data/</code>)</li>
-<li>Functions: Edit <a href='R/baxter.R' title=''>R/baxter.R</a>
-
-<ul>
-<li><code>get_metadata</code></li>
-<li><code>get_bmi</code></li>
-<li><code>get_bmi_category</code></li>
-<li><code>is_obese</code></li>
-</ul></li>
-</ol>
+<p>Let’s write conditions for the code from the <a href='http://www.riffomonas.org/minimalR/06_line_plots.html' title=''>Riffomonas minimalR</a> tutorial!</p>
 
 </article></slide><slide class=""><hgroup><h2>Activity</h2></hgroup><article  id="activity-1">
 
@@ -3301,29 +3166,10 @@ NULL</pre>
 <p><img height="275px" src='figures/new_PR.png' title=''/> <img height="275px" src='figures/example_PR.png' title=''/></p></li>
 </ol>
 
-</article></slide><slide class=""><hgroup><h2>R Packages</h2></hgroup><article  id="r-packages">
-
-<p>Setup an R package</p>
-
-<pre class = 'prettyprint lang-r'>library(usethis)
-library(devtools)
-create_package(file.path(getwd()))</pre>
-
-<p>Specify dependencies</p>
-
-<pre class = 'prettyprint lang-r'>use_package(&quot;dplyr&quot;)
-use_package(&quot;readxl&quot;)</pre>
-
-<p>Compile documentation</p>
-
-<pre class = 'prettyprint lang-r'>devtools::document()</pre>
-
 </article></slide><slide class=""><hgroup><h2>Additional Reading</h2></hgroup><article  id="additional-reading">
 
 <ul>
-<li><a href='http://r-pkgs.had.co.nz/man.html' title=''>R Packages</a> - Hadley Wickham</li>
-<li><a href='https://pkgdown.r-lib.org/' title=''>pkgdown</a>: build a website for your R package</li>
-<li><a href='https://bookdown.org/rdpeng/RProgDA/documentation.html' title=''>Mastering Software Development in R</a> - Roger Peng, Sean Kross, &amp; Brooke Anderson</li>
+<li><a href='http://r-pkgs.had.co.nz/man.html' title=''>Advanced R - conditions chapter</a> - Hadley Wickham</li>
 </ul></article></slide>
 
 

@@ -16,7 +16,7 @@ The BMI of a given individual, a number.
 }
 \description{
 The squared value of weight in kilograms
-divided by height in meters, which is 
+divided by height in meters, which is
 converted by dividing cm by 100.
 }
 \examples{

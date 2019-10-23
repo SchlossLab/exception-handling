@@ -2,10 +2,16 @@
 % Please edit documentation in R/baxter.R
 \name{get_metadata}
 \alias{get_metadata}
-\title{this is poorly-written documentation for get_metadata}
+\title{Reads and cleans raw metadata}
 \usage{
 get_metadata()
 }
+\value{
+The cleaned metadata as a dataframe
+}
 \description{
-this is poorly-written documentation for get_metadata
+Reads and cleans raw metadata
+}
+\examples{
+metadata <- get_metadata()
 }
