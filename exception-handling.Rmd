@@ -2,7 +2,7 @@
 title: "Exception Handling in R"
 author: "Kelly Sovacool"
 date: "28 Oct. 2019"
-output: 
+output:
     ioslides_presentation:
         widescreen: true
 ---
@@ -56,16 +56,16 @@ Let's write conditions for the code from the [Riffomonas minimalR](http://www.ri
     ```{bash}
     git push -u origin descriptive-branch-name
     ```
-1. Open a pull request on GitHub to merge your branch into master. 
+1. Open a pull request on GitHub to merge your branch into master.
     Mention your issue number(s) & assign me to the PR.
-    
+
     ![new P](figures/new_PR.png){height=275px} ![example PR](figures/example_PR.png){height=275px}
 
 
 ## Additional Reading
 
-- [Advanced R - conditions chapter](http://r-pkgs.had.co.nz/man.html) - Hadley Wickham
-    
+- [Advanced R - conditions chapter](http://r-pkgs.had.co.nz/man.html)
+- [The Fail Fast Principle](https://enterprisecraftsmanship.com/posts/fail-fast-principle/)
 
 ```{r, echo=FALSE}
 library(rmarkdown)
