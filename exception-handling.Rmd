@@ -1,63 +1,243 @@
 ---
 title: "Exception Handling in R"
+subtitle: "[Advanced R - conditions chapter](http://r-pkgs.had.co.nz/man.html)"
 author: "Kelly Sovacool"
 date: "28 Oct. 2019"
 output:
     ioslides_presentation:
         widescreen: true
 ---
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(eval = FALSE)
+```{r, include=FALSE}
+knitr::opts_chunk$set(eval = TRUE, error = TRUE)
 ```
 
-## Why?
+## Why raise conditions?
 
+- Fail fast: if something's wrong, you want to know immediately.
+- Have confidence the code works as intended.
 
+## Best practices
 
-## Ten simple rules for documenting scientific software
+"The best error messages tell you what is wrong and point you in the right direction to fix the problem."
 
-### Excerpted from [Lee et al. 2018](https://doi.org/10.1371/journal.pcbi.1006561):
+- [Advanced R (8.2.1)](https://adv-r.hadley.nz/conditions.html#errors-1)
 
-- Write error messages that provide solutions or point to your documentation.
+"The goal is to make it as easy as possible for the user to find and fix the problem."
 
+- [Tidyverse style guide on error messages](https://style.tidyverse.org/error-messages.html)
 
-## How (specifics for R)
+## Conditions in the wild
 
-### Best practices:
+```{r}
+library(readr)
+log(-1)
+this_object_DNE
+readr::read_csv("inst/extdata/baxter.metadata.csv")
+```
 
+## How to raise conditions
 
+```{r}
+library(rlang)
+message("Messages are benign.")
+warning("Warnings tell the user something could be wrong, but we can continue.")
+abort("This is an error; the program can't go on.")
+```
+4th type of condition: *`Interrupt`*: when you press "Stop" or `ctrl-c`.
+
+## Example
+
+```{r}
+my_log <- function(x, base = exp(1)) {
+  if (!is.numeric(x)) {
+    abort(paste0(
+      "`x` must be a numeric vector; not ", typeof(x), "."
+    ))
+  }
+  if (!is.numeric(base)) {
+    abort(paste0(
+      "`base` must be a numeric vector; not ", typeof(base), "."
+    ))
+  }
+
+  base::log(x, base = base)
+}
+my_log('abc')
+```
+
+## How to handle conditions: tryCatch 
+```{r, eval=FALSE}
+tryCatch(
+  error = function(cnd) {
+     # do this if you catch an error
+    code_to_run_when_error_is_thrown
+  },
+  # try this
+  code_to_run_while_handlers_are_active
+)
+```
+
+Why? When you want to modify the default behavior.
+
+---
+
+tryCatch doesn't return to the `try` after `Catch`ing an error
+```{r}
+tryCatch(
+  error = function(cnd) { # catch an error
+      print("Oh no, there's an error!")     
+    },
+  { # try this
+    bad_thing_happened = TRUE
+    if(bad_thing_happend) {
+        abort("We've gotta kill the program")
+    }
+    message("This code is never run!")
+  }
+)
+print("Continuing with the code")
+```
+
+---
+
+You can access the condition message in the `Catch`
+```{r}
+tryCatch(
+  error = function(cnd) { # catch an error
+      print("Oh no, there's an error!")      
+      print(conditionMessage(cnd))
+    },
+  { # try this
+    bad_thing_happened = TRUE
+    if(bad_thing_happend) {
+        abort("We've gotta kill the program")
+    }
+    message("This code is never run!")
+  }
+)
+print("Continuing with the code outside of tryCatch")
+```
+
+## How to handle conditions: withCallingHandlers
+
+```{r, eval=FALSE}
+withCallingHandlers(
+  warning = function(cnd) {
+    code_to_run_when_warning_is_signalled
+  },
+  message = function(cnd) {
+    code_to_run_when_message_is_signalled
+  },
+  code_to_run_while_handlers_are_active
+)
+```
+
+---
+
+withCallingHandlers returns to the `try`
+```{r}
+withCallingHandlers(
+  warning = function(cnd) {
+      print("Caught a warning!")
+      # do something special
+    },
+  {
+    weird_thing_happend = TRUE
+    if(weird_thing_happend) {
+        warning("Something might be wrong")
+    }
+    message("But let's keep going anyway")
+  }
+)
+```
+
+## How to write custom conditions
+
+Write a function that wraps `abort`
+
+```{r}
+library(glue)
+abort_bad_argument <- function(arg, must, not = NULL) {
+  # create a custom message
+  msg <- glue::glue("`{arg}` must {must}")
+  # append to the message if `not` was specified
+  if (!is.null(not)) {
+    not <- typeof(not)
+    msg <- glue::glue("{msg}; not {not}.")
+  }
+  # pass custom metadata to abort
+  abort("error_bad_argument", 
+    message = msg, 
+    arg = arg, 
+    must = must, 
+    not = not
+  )
+}
+```
+
+---
+
+Using our custom condition
+
+```{r}
+my_log <- function(x, base = exp(1)) {
+  if (!is.numeric(x)) {
+    abort_bad_argument("x", must = "be numeric", not = x)
+  }
+  if (!is.numeric(base)) {
+    abort_bad_argument("base", must = "be numeric", not = base)
+  }
+
+  base::log(x, base = base)
+}
+my_log(3, 'abc')
+```
+
+## Worst Practices
+
+- Wrapping your entire script in a `tryCatch`.
+- Catching errors or warnings and doing nothing with them.
+- Handling a condition when you should write a _conditional_ (`if-else`).
 
 ## Activity
 
-Let's write conditions for the code from the [Riffomonas minimalR](http://www.riffomonas.org/minimalR/06_line_plots.html) tutorial!
+Let's write conditions for the code from the [Riffomonas minimalR](http://www.riffomonas.org/minimalR/06_line_plots.html) tutorial and work on a few exercises from AdvancedR.
+
+- `R/baxter.R`
+    - `get_metadata()`
+    - `get_bmi()`
+    - `get_bmi_category()`
+- `R/exercises.R`
+    - `careful_remove()`
+    - `check_dependencies()`
+    - `bottles_of_beer()`
 
 ## Activity
 
 1. Clone this repo
-    ```{bash}
-    git clone https://github.com/SchlossLab/documenting-R
+    ```{bash, eval=FALSE}
+    git clone https://github.com/SchlossLab/exception-handling
     ```
     or if you previously cloned it, pull new commits:
-    ```{bash}
-    cd path/to/documenting-R/ ; git pull
+    ```{bash, eval=FALSE}
+    cd path/to/repo/ ; git pull
     ```
 1. Checkout a new branch
-    ```{bash}
+    ```{bash, eval=FALSE}
     git checkout -b descriptive-branch-name
     ```
 1. After modifying your part, commit your changes
-    ```{bash}
+    ```{bash, eval=FALSE}
     git add . ; git commit -m "descriptive commit message"
     ```
 
 ## Activity Wrap-up
 
 1. Push your changes
-    ```{bash}
+    ```{bash, eval=FALSE}
     git push -u origin descriptive-branch-name
     ```
-1. Open a pull request on GitHub to merge your branch into master.
-    Mention your issue number(s) & assign me to the PR.
+1. Open a pull request on GitHub, mention your issue number(s), and merge it if there aren't conflicts.
 
     ![new P](figures/new_PR.png){height=275px} ![example PR](figures/example_PR.png){height=275px}
 
@@ -67,7 +247,13 @@ Let's write conditions for the code from the [Riffomonas minimalR](http://www.ri
 - [Advanced R - conditions chapter](http://r-pkgs.had.co.nz/man.html)
 - [The Fail Fast Principle](https://enterprisecraftsmanship.com/posts/fail-fast-principle/)
 
-```{r, echo=FALSE}
+Relevant XKCDs:
+
+- https://xkcd.com/979/
+- https://xkcd.com/1024/
+- https://xkcd.com/2200/
+
+```{r, echo=FALSE, eval=FALSE}
 library(rmarkdown)
 rmarkdown::render('exception-handling.Rmd', output_file = 'docs/exception-handling.html')
 ```

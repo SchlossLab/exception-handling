@@ -1,14 +1,16 @@
 library(dplyr)
 library(readxl)
+library(readr)
+library(rlang)
 
 #' Reads and cleans raw metadata
 #'
 #' @return The cleaned metadata as a dataframe
 #' @examples
 #' metadata <- get_metadata()
-get_metadata <- function() {
+get_metadata <- function(filepath = "inst/extdata/baxter.metadata.xlsx") {
     baxter_metadata <- read_excel(
-        path = "inst/extdata/baxter.metadata.xlsx",
+        path = filepath,
         col_types = c(
             sample = "text",
             fit_result = "numeric",
@@ -53,7 +55,7 @@ get_metadata <- function() {
     return(baxter_metadata)
 }
 
-#' Returns an individuals body mass index, given metric units.
+#' Returns an individual's body mass index, given metric units.
 #'
 #' The squared value of weight in kilograms
 #' divided by height in meters, which is
@@ -67,8 +69,7 @@ get_metadata <- function() {
 #' get_bmi(50, 160)
 get_bmi <- function(weight_kg, height_cm){
     return(weight_kg / (height_cm/100) ^ 2)
-} #consider adding an error for 0 value entries to either param
-
+}
 
 #' Determine BMI category from get_bmi function results
 #'
@@ -81,12 +82,10 @@ get_bmi <- function(weight_kg, height_cm){
 #' get_bmi_category(180, 150)
 get_bmi_category <- function(weight_kg, height_cm){
     bmi <- get_bmi(weight_kg, height_cm)
-
     bmi_cat <- case_when(bmi >= 30 ~ "obese",
                          bmi >= 25 ~ "overweight",
                          bmi >= 18.5 ~ "normal",
                          TRUE ~ "underweight")
-
     return(bmi_cat)
 }
 

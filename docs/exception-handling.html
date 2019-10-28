@@ -20,7 +20,8 @@
       // Slide settings
       settings: {
                 title: 'Exception Handling in R',
-                        useBuilds: true,
+                        subtitle: '<a href="http://r-pkgs.had.co.nz/man.html">Advanced R - conditions chapter</a>',
+                useBuilds: true,
         usePrettify: true,
         enableSlideAreas: true,
         enableTouch: true,
@@ -3119,34 +3120,277 @@ slide:not(.current) .plotly.html-widget{
           </hgroup>
   </slide>
 
-<slide class=""><hgroup><h2>Why?</h2></hgroup><article  id="why">
-
-</article></slide><slide class=""><hgroup><h2>Ten simple rules for documenting scientific software</h2></hgroup><article  id="ten-simple-rules-for-documenting-scientific-software">
-
-<h3>Excerpted from <a href='https://doi.org/10.1371/journal.pcbi.1006561' title=''>Lee et al. 2018</a>:</h3>
+<slide class=""><hgroup><h2>Why raise conditions?</h2></hgroup><article  id="why-raise-conditions">
 
 <ul>
-<li>Write error messages that provide solutions or point to your documentation.</li>
+<li>Fail fast: if something’s wrong, you want to know immediately.</li>
+<li>Have confidence the code works as intended.</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>How (specifics for R)</h2></hgroup><article  id="how-specifics-for-r">
+</article></slide><slide class=""><hgroup><h2>Best practices</h2></hgroup><article  id="best-practices">
 
-<h3>Best practices:</h3>
+<p>&ldquo;The best error messages tell you what is wrong and point you in the right direction to fix the problem.&rdquo;</p>
+
+<ul>
+<li><a href='https://adv-r.hadley.nz/conditions.html#errors-1' title=''>Advanced R (8.2.1)</a></li>
+</ul>
+
+<p>&ldquo;The goal is to make it as easy as possible for the user to find and fix the problem.&rdquo;</p>
+
+<ul>
+<li><a href='https://style.tidyverse.org/error-messages.html' title=''>Tidyverse style guide on error messages</a></li>
+</ul>
+
+</article></slide><slide class=""><hgroup><h2>Conditions in the wild</h2></hgroup><article  id="conditions-in-the-wild">
+
+<pre class = 'prettyprint lang-r'>log(-1)</pre>
+
+<pre >## Warning in log(-1): NaNs produced</pre>
+
+<pre >## [1] NaN</pre>
+
+<pre class = 'prettyprint lang-r'>this_object_DNE</pre>
+
+<pre >## Error in eval(expr, envir, enclos): object &#39;this_object_DNE&#39; not found</pre>
+
+<pre class = 'prettyprint lang-r'>readr::read_csv(&quot;inst/extdata/baxter.metadata.csv&quot;)</pre>
+
+<pre >## Parsed with column specification:
+## cols(
+##   sample = col_double(),
+##   fit_result = col_double(),
+##   Site = col_character(),
+##   Dx_Bin = col_character(),
+##   dx = col_character(),
+##   Hx_Prev = col_double(),
+##   Hx_of_Polyps = col_double(),
+##   Age = col_double(),
+##   Gender = col_character(),
+##   Smoke = col_double(),
+##   Diabetic = col_double(),
+##   Hx_Fam_CRC = col_double(),
+##   Height = col_double(),
+##   Weight = col_double(),
+##   NSAID = col_double(),
+##   Diabetes_Med = col_double(),
+##   stage = col_double()
+## )</pre>
+
+</article></slide><slide class=""><hgroup><h2>How to raise conditions</h2></hgroup><article  id="how-to-raise-conditions">
+
+<pre class = 'prettyprint lang-r'>library(rlang)
+message(&quot;Messages are benign.&quot;)</pre>
+
+<pre >## Messages are benign.</pre>
+
+<pre class = 'prettyprint lang-r'>warning(&quot;Warnings tell the user something could be wrong, but we can continue.&quot;)</pre>
+
+<pre >## Warning: Warnings tell the user something could be wrong, but we can
+## continue.</pre>
+
+<pre class = 'prettyprint lang-r'>abort(&quot;This is an error; the program can&#39;t go on.&quot;)</pre>
+
+<pre >## This is an error; the program can&#39;t go on.</pre>
+
+<p>4th type of condition: <em><code>Interrupt</code></em>: when you press &ldquo;Stop&rdquo; or <code>ctrl-c</code>.</p>
+
+</article></slide><slide class=""><hgroup><h2>Example</h2></hgroup><article  id="example">
+
+<pre class = 'prettyprint lang-r'>my_log &lt;- function(x, base = exp(1)) {
+  if (!is.numeric(x)) {
+    abort(paste0(
+      &quot;`x` must be a numeric vector; not &quot;, typeof(x), &quot;.&quot;
+    ))
+  }
+  if (!is.numeric(base)) {
+    abort(paste0(
+      &quot;`base` must be a numeric vector; not &quot;, typeof(base), &quot;.&quot;
+    ))
+  }
+
+  base::log(x, base = base)
+}
+my_log(&#39;abc&#39;)</pre>
+
+<pre >## `x` must be a numeric vector; not character.</pre>
+
+</article></slide><slide class=""><hgroup><h2>How to handle conditions: tryCatch</h2></hgroup><article  id="how-to-handle-conditions-trycatch">
+
+<pre class = 'prettyprint lang-r'>tryCatch(
+  error = function(cnd) {
+     # do this if you catch an error
+    code_to_run_when_error_is_thrown
+  },
+  # try this
+  code_to_run_while_handlers_are_active
+)</pre>
+
+<p>Why? When you want to modify the default behavior.</p>
+
+</article></slide><slide class=""><hgroup><h2></h2></hgroup><article >
+
+<p>tryCatch doesn’t return to the <code>try</code> after <code>Catch</code>ing an error</p>
+
+<pre class = 'prettyprint lang-r'>tryCatch(
+  error = function(cnd) { # catch an error
+      print(&quot;Oh no, there&#39;s an error!&quot;)     
+    },
+  { # try this
+    bad_thing_happened = TRUE
+    if(bad_thing_happend) {
+        abort(&quot;We&#39;ve gotta kill the program&quot;)
+    }
+    message(&quot;This code is never run!&quot;)
+  }
+)</pre>
+
+<pre >## [1] &quot;Oh no, there&#39;s an error!&quot;</pre>
+
+<pre class = 'prettyprint lang-r'>print(&quot;Continuing with the code&quot;)</pre>
+
+<pre >## [1] &quot;Continuing with the code&quot;</pre>
+
+</article></slide><slide class=""><hgroup><h2></h2></hgroup><article >
+
+<p>You can access the condition message in the <code>Catch</code></p>
+
+<pre class = 'prettyprint lang-r'>tryCatch(
+  error = function(cnd) { # catch an error
+      print(&quot;Oh no, there&#39;s an error!&quot;)      
+      print(conditionMessage(cnd))
+    },
+  { # try this
+    bad_thing_happened = TRUE
+    if(bad_thing_happend) {
+        abort(&quot;We&#39;ve gotta kill the program&quot;)
+    }
+    message(&quot;This code is never run!&quot;)
+  }
+)</pre>
+
+<pre >## [1] &quot;Oh no, there&#39;s an error!&quot;
+## [1] &quot;object &#39;bad_thing_happend&#39; not found&quot;</pre>
+
+<pre class = 'prettyprint lang-r'>print(&quot;Continuing with the code outside of tryCatch&quot;)</pre>
+
+<pre >## [1] &quot;Continuing with the code outside of tryCatch&quot;</pre>
+
+</article></slide><slide class=""><hgroup><h2>How to handle conditions: withCallingHandlers</h2></hgroup><article  id="how-to-handle-conditions-withcallinghandlers">
+
+<pre class = 'prettyprint lang-r'>withCallingHandlers(
+  warning = function(cnd) {
+    code_to_run_when_warning_is_signalled
+  },
+  message = function(cnd) {
+    code_to_run_when_message_is_signalled
+  },
+  code_to_run_while_handlers_are_active
+)</pre>
+
+</article></slide><slide class=""><hgroup><h2></h2></hgroup><article >
+
+<p>withCallingHandlers returns to the <code>try</code></p>
+
+<pre class = 'prettyprint lang-r'>withCallingHandlers(
+  warning = function(cnd) {
+      print(&quot;Caught a warning!&quot;)
+      # do something special
+    },
+  {
+    weird_thing_happend = TRUE
+    if(weird_thing_happend) {
+        warning(&quot;Something might be wrong&quot;)
+    }
+    message(&quot;But let&#39;s keep going anyway&quot;)
+  }
+)</pre>
+
+<pre >## [1] &quot;Caught a warning!&quot;</pre>
+
+<pre >## Warning in withCallingHandlers(warning = function(cnd) {: Something might
+## be wrong</pre>
+
+<pre >## But let&#39;s keep going anyway</pre>
+
+</article></slide><slide class=""><hgroup><h2>How to write custom conditions</h2></hgroup><article  id="how-to-write-custom-conditions">
+
+<p>Write a function that wraps <code>abort</code></p>
+
+<pre class = 'prettyprint lang-r'>library(glue)
+abort_bad_argument &lt;- function(arg, must, not = NULL) {
+  # create a custom message
+  msg &lt;- glue::glue(&quot;`{arg}` must {must}&quot;)
+  # append to the message if `not` was specified
+  if (!is.null(not)) {
+    not &lt;- typeof(not)
+    msg &lt;- glue::glue(&quot;{msg}; not {not}.&quot;)
+  }
+  # pass custom metadata to abort
+  abort(&quot;error_bad_argument&quot;, 
+    message = msg, 
+    arg = arg, 
+    must = must, 
+    not = not
+  )
+}</pre>
+
+</article></slide><slide class=""><hgroup><h2></h2></hgroup><article >
+
+<p>Using our custom condition</p>
+
+<pre class = 'prettyprint lang-r'>my_log &lt;- function(x, base = exp(1)) {
+  if (!is.numeric(x)) {
+    abort_bad_argument(&quot;x&quot;, must = &quot;be numeric&quot;, not = x)
+  }
+  if (!is.numeric(base)) {
+    abort_bad_argument(&quot;base&quot;, must = &quot;be numeric&quot;, not = base)
+  }
+
+  base::log(x, base = base)
+}
+my_log(3, &#39;abc&#39;)</pre>
+
+<pre >## `base` must be numeric; not character.</pre>
+
+</article></slide><slide class=""><hgroup><h2>Worst Practices</h2></hgroup><article  id="worst-practices">
+
+<ul>
+<li>Wrapping your entire script in a <code>tryCatch</code>.</li>
+<li>Catching errors or warnings and doing nothing with them.</li>
+<li>Handling a condition when you should write a <em>conditional</em> (<code>if-else</code>).</li>
+</ul>
 
 </article></slide><slide class=""><hgroup><h2>Activity</h2></hgroup><article  id="activity">
 
-<p>Let’s write conditions for the code from the <a href='http://www.riffomonas.org/minimalR/06_line_plots.html' title=''>Riffomonas minimalR</a> tutorial!</p>
+<p>Let’s write conditions for the code from the <a href='http://www.riffomonas.org/minimalR/06_line_plots.html' title=''>Riffomonas minimalR</a> tutorial and work on a few exercises from AdvancedR.</p>
+
+<ul>
+<li><code>R/baxter.R</code>
+
+<ul>
+<li><code>get_metadata()</code></li>
+<li><code>get_bmi()</code></li>
+<li><code>get_bmi_category()</code></li>
+</ul></li>
+<li><code>R/exercises.R</code>
+
+<ul>
+<li><code>careful_remove()</code></li>
+<li><code>check_dependencies()</code></li>
+<li><code>bottles_of_beer()</code></li>
+</ul></li>
+</ul>
 
 </article></slide><slide class=""><hgroup><h2>Activity</h2></hgroup><article  id="activity-1">
 
 <ol>
 <li><p>Clone this repo</p>
 
-<pre class = 'prettyprint lang-bash'>git clone https://github.com/SchlossLab/documenting-R</pre>
+<pre class = 'prettyprint lang-bash'>git clone https://github.com/SchlossLab/exception-handling</pre>
 
 <p>or if you previously cloned it, pull new commits:</p>
 
-<pre class = 'prettyprint lang-bash'>cd path/to/documenting-R/ ; git pull</pre></li>
+<pre class = 'prettyprint lang-bash'>cd path/to/repo/ ; git pull</pre></li>
 <li><p>Checkout a new branch</p>
 
 <pre class = 'prettyprint lang-bash'>git checkout -b descriptive-branch-name</pre></li>
@@ -3161,7 +3405,7 @@ slide:not(.current) .plotly.html-widget{
 <li><p>Push your changes</p>
 
 <pre class = 'prettyprint lang-bash'>git push -u origin descriptive-branch-name</pre></li>
-<li><p>Open a pull request on GitHub to merge your branch into master. Mention your issue number(s) &amp; assign me to the PR.</p>
+<li><p>Open a pull request on GitHub, mention your issue number(s), and merge it if there aren’t conflicts.</p>
 
 <p><img height="275px" src='figures/new_PR.png' title=''/> <img height="275px" src='figures/example_PR.png' title=''/></p></li>
 </ol>
@@ -3169,7 +3413,16 @@ slide:not(.current) .plotly.html-widget{
 </article></slide><slide class=""><hgroup><h2>Additional Reading</h2></hgroup><article  id="additional-reading">
 
 <ul>
-<li><a href='http://r-pkgs.had.co.nz/man.html' title=''>Advanced R - conditions chapter</a> - Hadley Wickham</li>
+<li><a href='http://r-pkgs.had.co.nz/man.html' title=''>Advanced R - conditions chapter</a></li>
+<li><a href='https://enterprisecraftsmanship.com/posts/fail-fast-principle/' title=''>The Fail Fast Principle</a></li>
+</ul>
+
+<p>Relevant XKCDs:</p>
+
+<ul>
+<li><a href='https://xkcd.com/979/' title=''>https://xkcd.com/979/</a></li>
+<li><a href='https://xkcd.com/1024/' title=''>https://xkcd.com/1024/</a></li>
+<li><a href='https://xkcd.com/2200/' title=''>https://xkcd.com/2200/</a></li>
 </ul></article></slide>
 
 
