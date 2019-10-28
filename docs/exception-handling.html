@@ -3127,23 +3127,12 @@ slide:not(.current) .plotly.html-widget{
 <li>Have confidence the code works as intended.</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Best practices</h2></hgroup><article  id="best-practices">
-
-<p>&ldquo;The best error messages tell you what is wrong and point you in the right direction to fix the problem.&rdquo;</p>
-
-<ul>
-<li><a href='https://adv-r.hadley.nz/conditions.html#errors-1' title=''>Advanced R (8.2.1)</a></li>
-</ul>
-
-<p>&ldquo;The goal is to make it as easy as possible for the user to find and fix the problem.&rdquo;</p>
-
-<ul>
-<li><a href='https://style.tidyverse.org/error-messages.html' title=''>Tidyverse style guide on error messages</a></li>
-</ul>
+<img src='https://imgs.xkcd.com/comics/exploits_of_a_mom.png' title=''/>
 
 </article></slide><slide class=""><hgroup><h2>Conditions in the wild</h2></hgroup><article  id="conditions-in-the-wild">
 
-<pre class = 'prettyprint lang-r'>log(-1)</pre>
+<pre class = 'prettyprint lang-r'>library(readr)
+log(-1)</pre>
 
 <pre >## Warning in log(-1): NaNs produced</pre>
 
@@ -3179,32 +3168,31 @@ slide:not(.current) .plotly.html-widget{
 </article></slide><slide class=""><hgroup><h2>How to raise conditions</h2></hgroup><article  id="how-to-raise-conditions">
 
 <pre class = 'prettyprint lang-r'>library(rlang)
-message(&quot;Messages are benign.&quot;)</pre>
+message(&quot;This is a benign message.&quot;)</pre>
 
-<pre >## Messages are benign.</pre>
+<pre >## This is a benign message.</pre>
 
-<pre class = 'prettyprint lang-r'>warning(&quot;Warnings tell the user something could be wrong, but we can continue.&quot;)</pre>
+<pre class = 'prettyprint lang-r'>warning(&quot;Something could be wrong, but we can continue.&quot;)</pre>
 
-<pre >## Warning: Warnings tell the user something could be wrong, but we can
-## continue.</pre>
+<pre >## Warning: Something could be wrong, but we can continue.</pre>
 
-<pre class = 'prettyprint lang-r'>abort(&quot;This is an error; the program can&#39;t go on.&quot;)</pre>
+<pre class = 'prettyprint lang-r'>abort(&quot;The program can&#39;t go on, burn it all down!&quot;)</pre>
 
-<pre >## This is an error; the program can&#39;t go on.</pre>
+<pre >## The program can&#39;t go on, burn it all down!</pre>
 
-<p>4th type of condition: <em><code>Interrupt</code></em>: when you press &ldquo;Stop&rdquo; or <code>ctrl-c</code>.</p>
+<p>4th type of condition: <strong><code>Interrupt</code></strong>: when you press &ldquo;Stop&rdquo; or <code>ctrl-c</code>.</p>
 
 </article></slide><slide class=""><hgroup><h2>Example</h2></hgroup><article  id="example">
 
 <pre class = 'prettyprint lang-r'>my_log &lt;- function(x, base = exp(1)) {
   if (!is.numeric(x)) {
     abort(paste0(
-      &quot;`x` must be a numeric vector; not &quot;, typeof(x), &quot;.&quot;
+      &quot;`x` must be numeric; not &quot;, typeof(x), &quot;.&quot;
     ))
   }
   if (!is.numeric(base)) {
     abort(paste0(
-      &quot;`base` must be a numeric vector; not &quot;, typeof(base), &quot;.&quot;
+      &quot;`base` must be numeric; not &quot;, typeof(base), &quot;.&quot;
     ))
   }
 
@@ -3212,7 +3200,7 @@ message(&quot;Messages are benign.&quot;)</pre>
 }
 my_log(&#39;abc&#39;)</pre>
 
-<pre >## `x` must be a numeric vector; not character.</pre>
+<pre >## `x` must be numeric; not character.</pre>
 
 </article></slide><slide class=""><hgroup><h2>How to handle conditions: tryCatch</h2></hgroup><article  id="how-to-handle-conditions-trycatch">
 
@@ -3221,8 +3209,10 @@ my_log(&#39;abc&#39;)</pre>
      # do this if you catch an error
     code_to_run_when_error_is_thrown
   },
+  {
   # try this
   code_to_run_while_handlers_are_active
+  }
 )</pre>
 
 <p>Why? When you want to modify the default behavior.</p>
@@ -3233,22 +3223,20 @@ my_log(&#39;abc&#39;)</pre>
 
 <pre class = 'prettyprint lang-r'>tryCatch(
   error = function(cnd) { # catch an error
-      print(&quot;Oh no, there&#39;s an error!&quot;)     
+      message(&quot;Oh no, there&#39;s an error!&quot;)     
     },
   { # try this
     bad_thing_happened = TRUE
-    if(bad_thing_happend) {
+    if( bad_thing_happened) {
         abort(&quot;We&#39;ve gotta kill the program&quot;)
     }
     message(&quot;This code is never run!&quot;)
   }
 )</pre>
 
-<pre >## [1] &quot;Oh no, there&#39;s an error!&quot;</pre>
+<pre >## Oh no, there&#39;s an error!</pre>
 
-<pre class = 'prettyprint lang-r'>print(&quot;Continuing with the code&quot;)</pre>
-
-<pre >## [1] &quot;Continuing with the code&quot;</pre>
+<pre class = 'prettyprint lang-r'># the code outside the tryCatch block continues on afterward</pre>
 
 </article></slide><slide class=""><hgroup><h2></h2></hgroup><article >
 
@@ -3256,24 +3244,23 @@ my_log(&#39;abc&#39;)</pre>
 
 <pre class = 'prettyprint lang-r'>tryCatch(
   error = function(cnd) { # catch an error
-      print(&quot;Oh no, there&#39;s an error!&quot;)      
-      print(conditionMessage(cnd))
+      message(&quot;Oh no, there&#39;s an error!&quot;)      
+      message(conditionMessage(cnd))
     },
   { # try this
     bad_thing_happened = TRUE
-    if(bad_thing_happend) {
+    if( bad_thing_happened) {
         abort(&quot;We&#39;ve gotta kill the program&quot;)
     }
     message(&quot;This code is never run!&quot;)
   }
 )</pre>
 
-<pre >## [1] &quot;Oh no, there&#39;s an error!&quot;
-## [1] &quot;object &#39;bad_thing_happend&#39; not found&quot;</pre>
+<pre >## Oh no, there&#39;s an error!</pre>
 
-<pre class = 'prettyprint lang-r'>print(&quot;Continuing with the code outside of tryCatch&quot;)</pre>
+<pre >## We&#39;ve gotta kill the program</pre>
 
-<pre >## [1] &quot;Continuing with the code outside of tryCatch&quot;</pre>
+<pre class = 'prettyprint lang-r'># the code outside the tryCatch block continues on afterward</pre>
 
 </article></slide><slide class=""><hgroup><h2>How to handle conditions: withCallingHandlers</h2></hgroup><article  id="how-to-handle-conditions-withcallinghandlers">
 
@@ -3289,34 +3276,28 @@ my_log(&#39;abc&#39;)</pre>
 
 </article></slide><slide class=""><hgroup><h2></h2></hgroup><article >
 
-<p>withCallingHandlers returns to the <code>try</code></p>
+<p>withCallingHandlers returns to the <code>try</code> after a <code>Catch</code></p>
 
 <pre class = 'prettyprint lang-r'>withCallingHandlers(
   warning = function(cnd) {
-      print(&quot;Caught a warning!&quot;)
+      message(&quot;Caught a warning!&quot;)
       # do something special
     },
   {
-    weird_thing_happend = TRUE
-    if(weird_thing_happend) {
-        warning(&quot;Something might be wrong&quot;)
-    }
-    message(&quot;But let&#39;s keep going anyway&quot;)
+    warning(&quot;Something might be wrong.\n&quot;)
+    message(&quot;But let&#39;s keep going anyway.&quot;)
   }
 )</pre>
 
-<pre >## [1] &quot;Caught a warning!&quot;</pre>
+<pre >## Caught a warning!</pre>
 
-<pre >## Warning in withCallingHandlers(warning = function(cnd) {: Something might
-## be wrong</pre>
+<pre >## Warning in withCallingHandlers(warning = function(cnd) {: Something might be wrong.</pre>
 
-<pre >## But let&#39;s keep going anyway</pre>
+<pre >## But let&#39;s keep going anyway.</pre>
 
 </article></slide><slide class=""><hgroup><h2>How to write custom conditions</h2></hgroup><article  id="how-to-write-custom-conditions">
 
-<p>Write a function that wraps <code>abort</code></p>
-
-<pre class = 'prettyprint lang-r'>library(glue)
+<pre class = 'prettyprint lang-r'>library(glue)  # Write a function that wraps `abort`
 abort_bad_argument &lt;- function(arg, must, not = NULL) {
   # create a custom message
   msg &lt;- glue::glue(&quot;`{arg}` must {must}&quot;)
@@ -3351,6 +3332,20 @@ abort_bad_argument &lt;- function(arg, must, not = NULL) {
 my_log(3, &#39;abc&#39;)</pre>
 
 <pre >## `base` must be numeric; not character.</pre>
+
+</article></slide><slide class=""><hgroup><h2>Best practices</h2></hgroup><article  id="best-practices">
+
+<p>&ldquo;The best error messages tell you what is wrong and point you in the right direction to fix the problem.&rdquo;</p>
+
+<ul>
+<li><a href='https://adv-r.hadley.nz/conditions.html#errors-1' title=''>Advanced R (8.2.1)</a></li>
+</ul>
+
+<p>&ldquo;The goal is to make it as easy as possible for the user to find and fix the problem.&rdquo;</p>
+
+<ul>
+<li><a href='https://style.tidyverse.org/error-messages.html' title=''>Tidyverse style guide on error messages</a></li>
+</ul>
 
 </article></slide><slide class=""><hgroup><h2>Worst Practices</h2></hgroup><article  id="worst-practices">
 
@@ -3420,6 +3415,7 @@ my_log(3, &#39;abc&#39;)</pre>
 <p>Relevant XKCDs:</p>
 
 <ul>
+<li><a href='https://xkcd.com/327/' title=''>https://xkcd.com/327/</a></li>
 <li><a href='https://xkcd.com/979/' title=''>https://xkcd.com/979/</a></li>
 <li><a href='https://xkcd.com/1024/' title=''>https://xkcd.com/1024/</a></li>
 <li><a href='https://xkcd.com/2200/' title=''>https://xkcd.com/2200/</a></li>

@@ -16,15 +16,7 @@ knitr::opts_chunk$set(eval = TRUE, error = TRUE)
 - Fail fast: if something's wrong, you want to know immediately.
 - Have confidence the code works as intended.
 
-## Best practices
-
-"The best error messages tell you what is wrong and point you in the right direction to fix the problem."
-
-- [Advanced R (8.2.1)](https://adv-r.hadley.nz/conditions.html#errors-1)
-
-"The goal is to make it as easy as possible for the user to find and fix the problem."
-
-- [Tidyverse style guide on error messages](https://style.tidyverse.org/error-messages.html)
+![](https://imgs.xkcd.com/comics/exploits_of_a_mom.png)
 
 ## Conditions in the wild
 
@@ -39,11 +31,11 @@ readr::read_csv("inst/extdata/baxter.metadata.csv")
 
 ```{r}
 library(rlang)
-message("Messages are benign.")
-warning("Warnings tell the user something could be wrong, but we can continue.")
-abort("This is an error; the program can't go on.")
+message("This is a benign message.")
+warning("Something could be wrong, but we can continue.")
+abort("The program can't go on, burn it all down!")
 ```
-4th type of condition: *`Interrupt`*: when you press "Stop" or `ctrl-c`.
+4th type of condition: **`Interrupt`**: when you press "Stop" or `ctrl-c`.
 
 ## Example
 
@@ -51,12 +43,12 @@ abort("This is an error; the program can't go on.")
 my_log <- function(x, base = exp(1)) {
   if (!is.numeric(x)) {
     abort(paste0(
-      "`x` must be a numeric vector; not ", typeof(x), "."
+      "`x` must be numeric; not ", typeof(x), "."
     ))
   }
   if (!is.numeric(base)) {
     abort(paste0(
-      "`base` must be a numeric vector; not ", typeof(base), "."
+      "`base` must be numeric; not ", typeof(base), "."
     ))
   }
 
@@ -72,8 +64,10 @@ tryCatch(
      # do this if you catch an error
     code_to_run_when_error_is_thrown
   },
+  {
   # try this
   code_to_run_while_handlers_are_active
+  }
 )
 ```
 
@@ -85,17 +79,17 @@ tryCatch doesn't return to the `try` after `Catch`ing an error
 ```{r}
 tryCatch(
   error = function(cnd) { # catch an error
-      print("Oh no, there's an error!")     
+      message("Oh no, there's an error!")     
     },
   { # try this
     bad_thing_happened = TRUE
-    if(bad_thing_happend) {
+    if( bad_thing_happened) {
         abort("We've gotta kill the program")
     }
     message("This code is never run!")
   }
 )
-print("Continuing with the code")
+# the code outside the tryCatch block continues on afterward
 ```
 
 ---
@@ -104,18 +98,18 @@ You can access the condition message in the `Catch`
 ```{r}
 tryCatch(
   error = function(cnd) { # catch an error
-      print("Oh no, there's an error!")      
-      print(conditionMessage(cnd))
+      message("Oh no, there's an error!")      
+      message(conditionMessage(cnd))
     },
   { # try this
     bad_thing_happened = TRUE
-    if(bad_thing_happend) {
+    if( bad_thing_happened) {
         abort("We've gotta kill the program")
     }
     message("This code is never run!")
   }
 )
-print("Continuing with the code outside of tryCatch")
+# the code outside the tryCatch block continues on afterward
 ```
 
 ## How to handle conditions: withCallingHandlers
@@ -134,29 +128,24 @@ withCallingHandlers(
 
 ---
 
-withCallingHandlers returns to the `try`
+withCallingHandlers returns to the `try` after a `Catch`
 ```{r}
 withCallingHandlers(
   warning = function(cnd) {
-      print("Caught a warning!")
+      message("Caught a warning!")
       # do something special
     },
   {
-    weird_thing_happend = TRUE
-    if(weird_thing_happend) {
-        warning("Something might be wrong")
-    }
-    message("But let's keep going anyway")
+    warning("Something might be wrong.\n")
+    message("But let's keep going anyway.")
   }
 )
 ```
 
 ## How to write custom conditions
 
-Write a function that wraps `abort`
-
 ```{r}
-library(glue)
+library(glue)  # Write a function that wraps `abort`
 abort_bad_argument <- function(arg, must, not = NULL) {
   # create a custom message
   msg <- glue::glue("`{arg}` must {must}")
@@ -192,6 +181,16 @@ my_log <- function(x, base = exp(1)) {
 }
 my_log(3, 'abc')
 ```
+
+## Best practices
+
+"The best error messages tell you what is wrong and point you in the right direction to fix the problem."
+
+- [Advanced R (8.2.1)](https://adv-r.hadley.nz/conditions.html#errors-1)
+
+"The goal is to make it as easy as possible for the user to find and fix the problem."
+
+- [Tidyverse style guide on error messages](https://style.tidyverse.org/error-messages.html)
 
 ## Worst Practices
 
@@ -249,6 +248,7 @@ Let's write conditions for the code from the [Riffomonas minimalR](http://www.ri
 
 Relevant XKCDs:
 
+- https://xkcd.com/327/
 - https://xkcd.com/979/
 - https://xkcd.com/1024/
 - https://xkcd.com/2200/
